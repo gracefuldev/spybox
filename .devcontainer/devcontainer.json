@@ -1,0 +1,23 @@
+{
+    "name": "Spybox Dev Environment",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "main",
+    "workspaceFolder": "/workspace",
+    "shutdownAction": "stopCompose",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-vscode.vscode-json"
+            ]
+        }
+    },
+    "forwardPorts": [8081],
+    "portsAttributes": {
+        "8081": {
+            "label": "mitmproxy web UI",
+            "onAutoForward": "notify"
+        }
+    },
+    "postCreateCommand": "chmod +x /workspace/scripts/*.sh"
+}

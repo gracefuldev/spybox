@@ -1,53 +1,32 @@
-version: '3.8'
-
 services:
   main:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - ..:/workspace:cached
-      - mitm-logs:/var/log/mitmproxy
-      - mitm-certs:/usr/local/share/ca-certificates/mitmproxy
-    working_dir: /workspace
+    build: .
     command: sleep infinity
-    environment:
-      - no_proxy=localhost,127.0.0.1,::1
-    depends_on:
-      - mitmproxy
-    cap_add:
-      - NET_ADMIN
-    privileged: true
-    networks:
-      - spybox-network
-
-  mitmproxy:
-    image: mitmproxy/mitmproxy:latest
-    command: >
-      mitmweb --mode transparent
-      --showhost
-      --set confdir=/home/mitmproxy/.mitmproxy
-      --set web_host=0.0.0.0
-      --set web_port=8081
-      --set web_open_browser=false
-      --set web_password=password
-      --scripts /scripts/log_requests.py
-    ports:
-      - "8081:8081"
+    working_dir: /workspace
     volumes:
-      - mitm-logs:/var/log/mitmproxy
-      - mitm-certs:/home/mitmproxy/.mitmproxy
-      - ./scripts:/scripts
+      - ..:/workspace
     networks:
-      - spybox-network
+      - mitm-network
     cap_add:
       - NET_ADMIN
     privileged: true
 
-volumes:
-  mitm-logs:
-  mitm-certs:
+  mitmweb:
+    image: mitmproxy/mitmproxy:latest
+    command: mitmweb --mode wireguard --web-host 0.0.0.0 --web-port 8081 --set web_password=password
+    ports:
+      - "8081:8081"  # mitmweb interface
+      - "51820:51820/udp"  # WireGuard port
+    networks:
+      - mitm-network
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - mitmproxy-data:/home/mitmproxy/.mitmproxy
 
 networks:
-  spybox-network:
+  mitm-network:
     driver: bridge
+
+volumes:
+  mitmproxy-data:

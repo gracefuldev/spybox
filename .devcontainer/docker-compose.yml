@@ -30,6 +30,7 @@ services:
       --set web_host=0.0.0.0
       --set web_port=8081
       --set web_open_browser=false
+      --set web_password=password
       --scripts /scripts/log_requests.py
     ports:
       - "8081:8081"
